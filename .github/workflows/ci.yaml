@@ -19,33 +19,24 @@ jobs:
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
-
       - name: Install Python
         uses: actions/setup-python@v5
         with:
           python-version: "3.12"
-
       - name: Install dependencies
         run: |
           python -m pip install --upgrade pip
           pip install -r requirements.txt
           pip install uvicorn pytest-playwright
           playwright install --with-deps chromium
-
       - name: Start app
         run: |
-          nohup uvicorn app.main:app --host 0.0.0.0 --port 8181 > server.log 2>&1 &
-          echo "Waiting for server to be ready..."
-          for i in {1..30}; do
-            curl -s http://localhost:8181/health && break || sleep 2
-          done
-          echo "Server started"
-
+          nohup uvicorn app.main:app --host 127.0.0.1 --port 8181 &
+          sleep 5
       - name: Run tests
         env:
           PYTHONPATH: ${{ github.workspace }}
         run: pytest --junitxml=test_result.xml
-
       - name: Upload test results
         if: always()
         uses: actions/upload-artifact@v4
@@ -62,14 +53,12 @@ jobs:
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
-
       - name: Log in to GitHub Container Registry
         uses: docker/login-action@v4
         with:
           registry: ghcr.io
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
-
       - name: Docker meta
         id: meta
         uses: docker/metadata-action@v6
@@ -77,7 +66,6 @@ jobs:
           images: ghcr.io/${{ github.repository_owner }}/${{ github.event.repository.name }}
           tags: |
             type=raw,value=${{ github.sha }}
-
       - name: Build and push
         uses: docker/build-push-action@v5
         with:
@@ -86,5 +74,5 @@ jobs:
           build-args: |
             DEPLOY_REF=${{ github.sha }}
           tags: |
-            ghcr.io/${{ github.repository_owner }}/catty-reminders-app:lab3
-            ghcr.io/${{ github.repository_owner }}/catty-reminders-app:${{ github.sha }}
+            ghcr.io/ivandelibaltov/catty-reminders-app:lab3
+            ghcr.io/ivandelibaltov/catty-reminders-app:${{ github.sha }}
