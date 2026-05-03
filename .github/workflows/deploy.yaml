@@ -19,5 +19,5 @@ jobs:
             set -e
             cd /home/vano/catty-reminders-app
             chmod +x ./deploy.sh
-            echo "${{ secrets.GITHUB_TOKEN }}" | docker login ghcr.io -u ${{ github.repository_owner }} --password-stdin
-            ./deploy.sh "ghcr.io/${{ github.repository_owner }}/catty-reminders-app" "${{ github.sha }}"
+            echo "${{ secrets.GITHUB_TOKEN }}" | docker login ghcr.io -u ivandelibaltov --password-stdin
+            ./deploy.sh "ghcr.io/ivandelibaltov/catty-reminders-app" "${{ github.sha }}"
